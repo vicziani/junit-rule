@@ -38,8 +38,11 @@ public class JavaStdinAndStdoutTest {
 
         StreamSupport
                 .stream(Spliterators.spliterator(
-                        new Scanner(System.in), Integer.MAX_VALUE, Spliterator.NONNULL | Spliterator.IMMUTABLE),
-                        false).forEach(System.out::println);
+                        new Scanner(System.in),
+                        Integer.MAX_VALUE,
+                        Spliterator.NONNULL | Spliterator.IMMUTABLE),
+                        false)
+                .forEach(System.out::println);
         hackerrankRule.assertOutput();
     }
 }
