@@ -10,20 +10,27 @@ public class LoggerOutputStream extends OutputStream {
 
     private OutputStream target;
 
-    public LoggerOutputStream(OutputStream target) {
+    private boolean muted;
+
+    public LoggerOutputStream(OutputStream target, boolean muted) {
         this.target = target;
+        this.muted = muted;
     }
 
     @Override
     public void write(int b) throws IOException {
         log.write(b);
-        target.write(b);
+        if (!muted) {
+            target.write(b);
+        }
     }
 
     @Override
     public void flush() throws IOException {
         log.flush();
-        target.flush();
+        if (!muted) {
+            target.flush();
+        }
     }
 
     @Override

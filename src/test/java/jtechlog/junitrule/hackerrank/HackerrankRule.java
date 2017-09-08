@@ -13,7 +13,13 @@ public class HackerrankRule implements TestRule {
     private static final String DEFAULT_POSTFIX = "00";
     // ExternalResource nem jó, mert lefogja az Exception-t
 
-    private String postfix;
+    private Class testClass;
+
+    private boolean activated;
+
+    private boolean muted = true;
+
+    private String postfix = DEFAULT_POSTFIX;
 
     private InputStream tmpIn;
 
@@ -21,27 +27,36 @@ public class HackerrankRule implements TestRule {
 
     private LoggerOutputStream loggerOutputStream;
 
-    public HackerrankRule() {
-        postfix = DEFAULT_POSTFIX;
-    }
-
-    public HackerrankRule(String postfix) {
-        this.postfix = postfix;
+    public void assertOutput() {
+        // Assert
+        assertThat(new ByteArrayInputStream(loggerOutputStream.getLog().toByteArray()),
+                containsSameLines(testClass.getResourceAsStream("output/output" + postfix + ".txt")));
     }
 
     @Override
     public Statement apply(Statement base, Description description) {
+        testClass = description.getTestClass();
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                before(description.getTestClass());
                 base.evaluate();
-                after(description.getTestClass());
+                after();
             }
         };
     }
 
-    private void before(Class<?> testClass) throws Throwable {
+    public HackerrankRule withPostfix(String postfix) {
+        this.postfix = postfix;
+        return this;
+    }
+
+    public HackerrankRule enableSystemOut() {
+        this.muted = false;
+        return this;
+    }
+
+    public void activate() {
+        activated = true;
 
         tmpIn = System.in;
         tmpOut = System.out;
@@ -53,20 +68,16 @@ public class HackerrankRule implements TestRule {
         }
         System.setIn(new BufferedInputStream(is));
 
-        loggerOutputStream = new LoggerOutputStream(System.out);
+        loggerOutputStream = new LoggerOutputStream(System.out, muted);
         System.setOut(new PrintStream(loggerOutputStream));
     }
 
-    private void after(Class<?> testClass) {
+    private void after() {
         // Revert
-        System.setIn(tmpIn);
-        System.setOut(tmpOut);
-
-        // Assert
-        assertThat(new ByteArrayInputStream(loggerOutputStream.getLog().toByteArray()),
-                containsSameLines(testClass.getResourceAsStream("output/output" + postfix + ".txt")));
-
-
-
+        if (activated) {
+            System.setIn(tmpIn);
+            System.setOut(tmpOut);
+        }
     }
+
 }

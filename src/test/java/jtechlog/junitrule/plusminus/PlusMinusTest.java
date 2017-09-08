@@ -10,10 +10,11 @@ import java.util.stream.IntStream;
 public class PlusMinusTest {
 
     @Rule
-    public HackerrankRule hackerrankRule = new HackerrankRule("01");
+    public HackerrankRule hackerrankRule = new HackerrankRule();
 
     @Test
     public void testSolution() {
+        hackerrankRule.withPostfix("01").activate();
         Scanner scanner = new Scanner(System.in);
 
         int n = scanner.nextInt();
@@ -21,6 +22,8 @@ public class PlusMinusTest {
                 .map(i -> scanner.nextInt())
                 .toArray();
         new Solution().execute(arr);
+
+        hackerrankRule.assertOutput();
     }
     
 }
