@@ -41,8 +41,6 @@ public class HackerrankRule implements TestRule {
             public void evaluate() throws Throwable {
                 try {
                     base.evaluate();
-                } catch (Exception e) {
-                    throw e;
                 } finally {
                     after();
                 }
