@@ -39,8 +39,13 @@ public class HackerrankRule implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                base.evaluate();
-                after();
+                try {
+                    base.evaluate();
+                } catch (Exception e) {
+                    throw e;
+                } finally {
+                    after();
+                }
             }
         };
     }
