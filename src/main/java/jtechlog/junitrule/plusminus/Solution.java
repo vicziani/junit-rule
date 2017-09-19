@@ -1,6 +1,7 @@
 package jtechlog.junitrule.plusminus;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.stream.IntStream;
 
 public class Solution {
@@ -22,6 +23,6 @@ public class Solution {
                 // Első, melyet módosítani kell
                 (int[] a, int[] b) -> IntStream.range(0, a.length).forEach((i) -> b[i] += a[i]));
                 // Második, melyet módosítani kell
-        Arrays.stream(sum).skip(1).forEach((i) -> System.out.printf("%.6f\n", i / (double) sum[0]));
+        Arrays.stream(sum).skip(1).forEach((i) -> System.out.printf(Locale.ENGLISH, "%.6f\n", i / (double) sum[0]));
     }
 }
