@@ -14,7 +14,6 @@ public class PlusMinusTest {
 
     @Test
     public void testSolution() {
-        hackerrankRule.withPostfix("01").activate();
         Scanner scanner = new Scanner(System.in);
 
         int n = scanner.nextInt();
@@ -22,8 +21,6 @@ public class PlusMinusTest {
                 .map(i -> scanner.nextInt())
                 .toArray();
         new Solution().execute(arr);
-
-        hackerrankRule.assertOutput();
     }
     
 }

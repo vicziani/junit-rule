@@ -21,14 +21,9 @@ public class JavaStdinAndStdoutTest {
     @Rule
     public HackerrankRule hackerrankRule = new HackerrankRule();
 
-    @Test
-    public void testWithoutHackerrankRule() {
-        assertThat(1 + 1, equalTo(2));
-    }
 
     @Test
     public void testSolution() {
-        hackerrankRule.activate();
 //        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8))) {
 //            reader.lines().forEach(System.out::println);
 //        }
@@ -43,6 +38,5 @@ public class JavaStdinAndStdoutTest {
                         Spliterator.NONNULL | Spliterator.IMMUTABLE),
                         false)
                 .forEach(System.out::println);
-        hackerrankRule.assertOutput();
     }
 }

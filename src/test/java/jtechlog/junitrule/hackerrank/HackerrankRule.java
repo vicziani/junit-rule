@@ -5,21 +5,18 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import java.io.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static jtechlog.junitrule.hackerrank.ContainsSameLinesMatcher.containsSameLines;
 import static org.junit.Assert.assertThat;
 
 public class HackerrankRule implements TestRule {
-    private static final String DEFAULT_POSTFIX = "00";
     // ExternalResource nem jó, mert lefogja az Exception-t
 
     private Class testClass;
 
-    private boolean activated;
-
     private boolean muted = true;
-
-    private String postfix = DEFAULT_POSTFIX;
 
     private InputStream tmpIn;
 
@@ -27,20 +24,32 @@ public class HackerrankRule implements TestRule {
 
     private LoggerOutputStream loggerOutputStream;
 
-    public void assertOutput() {
+    private void assertOutput(String filename) {
         // Assert
+        String path = "output/" + filename.replace("in", "out");
+        InputStream inputStream = testClass.getResourceAsStream(path);
+        if (inputStream == null) {
+            throw new IllegalStateException(String.format("File not found on path %s", path));
+        }
         assertThat(new ByteArrayInputStream(loggerOutputStream.getLog().toByteArray()),
-                containsSameLines(testClass.getResourceAsStream("output/output" + postfix + ".txt")));
+                containsSameLines(inputStream, path));
     }
 
     @Override
     public Statement apply(Statement base, Description description) {
         testClass = description.getTestClass();
+
+        List<String> files = getResourceFiles("input");
+
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
                 try {
-                    base.evaluate();
+                    for (String file: files) {
+                        activate(file);
+                        base.evaluate();
+                        assertOutput(file);
+                    }
                 } finally {
                     after();
                 }
@@ -48,26 +57,19 @@ public class HackerrankRule implements TestRule {
         };
     }
 
-    public HackerrankRule withPostfix(String postfix) {
-        this.postfix = postfix;
-        return this;
-    }
-
     public HackerrankRule enableSystemOut() {
         this.muted = false;
         return this;
     }
 
-    public void activate() {
-        activated = true;
-
+    public void activate(String filename) {
         tmpIn = System.in;
         tmpOut = System.out;
 
-        String filename = "input/input" + postfix + ".txt";
-        InputStream is = testClass.getResourceAsStream(filename);
+        String path = "input/" + filename;
+        InputStream is = testClass.getResourceAsStream(path);
         if (is == null) {
-            throw new IllegalArgumentException("File '" + filename + "' not found");
+            throw new IllegalArgumentException("File '" + path + "' not found");
         }
         System.setIn(new BufferedInputStream(is));
 
@@ -77,9 +79,16 @@ public class HackerrankRule implements TestRule {
 
     private void after() {
         // Revert
-        if (activated) {
-            System.setIn(tmpIn);
-            System.setOut(tmpOut);
+        System.setIn(tmpIn);
+        System.setOut(tmpOut);
+    }
+
+    private List<String> getResourceFiles(String path) {
+        try (BufferedReader br = new BufferedReader( new InputStreamReader( testClass.getResourceAsStream(path) ) ) ) {
+           return br.lines().collect(Collectors.toList());
+        }
+        catch (IOException ioe) {
+            throw new IllegalArgumentException(String.format("File not found on path %s", path));
         }
     }
 
